@@ -16,18 +16,22 @@ HomePanel-S3 is a Wi-Fi-connected touch panel for Home Assistant, built on the E
 - **NVS Caching:** Discovered entities are cached so the UI loads instantly on reboot before HA responds.
 - **Hardware-Accelerated Graphics:** Double/triple-buffered PSRAM rendering for tear-free 16-bit color.
 - **Async Command Queue:** 120ms coalescing ensures the UI stays responsive during rapid interactions.
-- **Auto-Dim & Battery Monitor:** Screen dims after inactivity; battery percentage shown in status bar.
 - **Robust Offline Handling:** Reconnection logic and "OFFLINE" badge after 3 consecutive API failures.
 
 ## Hardware
 
-Optimized for the **Waveshare ESP32-S3-Touch-LCD-7** but adaptable to any ST7701-based RGB display.
+Built for the **[Waveshare ESP32-S3-Touch-LCD-7](https://www.waveshare.com/esp32-s3-touch-lcd-7.htm)** but adaptable to any ST7701-based RGB display.
 
 | Component | Spec |
 |-----------|------|
-| MCU | ESP32-S3R8 (Octal PSRAM) |
-| Display | 7" 800x480 RGB LCD (ST7701) |
-| Touch | GT911 capacitive (I2C) |
+| MCU | ESP32-S3N16R8, dual-core Xtensa LX7, up to 240 MHz |
+| Flash | 16 MB onboard |
+| PSRAM | 8 MB octal |
+| Display | 7" IPS, 800×480, 65K color, RGB parallel interface (ST7701) |
+| Touch | GT911, 5-point capacitive, I2C |
+| Wireless | 2.4 GHz Wi-Fi 802.11 b/g/n, Bluetooth 5 LE |
+| USB | USB Type-C (full-speed) |
+| Dimensions | 192.96 × 110.76 mm |
 
 ## Quick Start
 
@@ -105,6 +109,14 @@ On subsequent reboots the cached entity list is shown immediately, then refreshe
 
 Entity states are polled from `/api/states` every 10 seconds.
 
+### Scenes and Automations
+
+Scenes and automations appear on the Scenes tab. Tap a button to activate a scene or trigger an automation. Disabled automations are hidden. Only the first 20 scenes and 20 automations are shown to avoid clutter.
+
+### Color Temperature
+
+Color temperature controls use mireds (`mireds = round(1e6 / kelvin)`), clamped to each light's `min_mireds`/`max_mireds`. RGB and color-temp sliders are only shown when the light's `supported_color_modes` includes `"rgb"` or `"color_temp"`. UI sliders debounce before sending to avoid flooding the network.
+
 ## Simulator (Windows)
 
 Iterate on layout without flashing hardware. Requires **Visual Studio Build Tools** (MSVC) and CMake on PATH.
@@ -114,6 +126,33 @@ cmake -S simulator -B simulator/build
 cmake --build simulator/build --config Release
 .\simulator\build\Release\panel_simulator.exe
 ```
+
+## Troubleshooting
+
+**Panel won't connect to Home Assistant**
+Verify `HA_BASE_URL` and `HA_TOKEN` in menuconfig match your server. An offline badge appears center-screen after 3 consecutive API failures (~30 seconds) and clears automatically on reconnect.
+
+**Touch input unresponsive**
+Confirm GT911 I2C wiring (SCL/SDA/RST) matches the pin assignments in `main/waveshare_rgb_lcd_port.h`. Default: SCL=GPIO9, SDA=GPIO8, RST=GPIO4.
+
+**Watchdog resets**
+Check `idf.py monitor` for `WDT timeout` messages. Ensure long operations yield or run in separate tasks.
+
+**Memory pressure**
+Run `idf.py size-components` or log `heap_caps_get_free_size(MALLOC_CAP_DEFAULT)` at runtime. Free unused LVGL objects promptly.
+
+**Log level control**
+Adjust in menuconfig (`Component config → Log output → Default log level`) or define `LOG_LOCAL_LEVEL` per file. Key log tags: `discovery`, `tabbed_ui`, `ha_client`, `CMDQ`, `wifi_mgr`.
+
+## Reliability Checklist
+
+Before deploying:
+
+- [ ] Runs 24 hours without watchdog resets or memory leaks
+- [ ] Offline badge appears after ~30s of HA unavailability and clears on reconnect
+- [ ] All UI pages scroll and update correctly within ~10 seconds
+- [ ] Touch accurate across the full display area
+- [ ] Wi-Fi reconnects automatically after router restart
 
 ## License
 

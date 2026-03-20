@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is an **ESP32-S3 touch panel firmware** that implements a Wi-Fi connected Home Assistant control panel using ESP-IDF v5.5.0, LVGL graphics library, ST7701 RGB LCD driver (800x480), and GT911 capacitive touch controller.
 
-**Target Hardware:** ESP32-S3R8 with ST7701 RGB display and GT911 touch controller
+**Target Hardware:** [Waveshare ESP32-S3-Touch-LCD-7](https://www.waveshare.com/esp32-s3-touch-lcd-7.htm) — ESP32-S3N16R8 (16MB flash, 8MB octal PSRAM), 7" IPS 800×480 RGB display (ST7701), GT911 5-point capacitive touch
 
 ## Build Commands
 
@@ -95,7 +95,6 @@ app_main() -> panel_start_task (FreeRTOS, priority 5, core 1)
 
 | Task | Priority | Stack | Purpose | Interval |
 | --- | --- | --- | --- | --- |
-| `battery_ui` | 4 | 4KB | Update battery indicator | 60s (timer) |
 | `ha_discovery` | 4 | 12KB | Fetch entities from HA, build tabbed UI | One-shot |
 | `ha_poll` | 3 | 8KB | Poll /api/states for entity state changes | 10s |
 | `cmd_worker` | 5 | 4KB | Process command queue | On-demand |
@@ -148,7 +147,6 @@ HomePanel-S3/
 |   |   +-- tabbed_ui.c                # Swipeable tileview UI
 |   |   +-- config.c                   # NVS storage
 |   |   +-- wifi_manager.c             # WiFi connection handling
-|   |   +-- battery_monitor.c          # ADC battery reading
 |   |   +-- offline_tracker.c          # API failure detection
 |   |   +-- scene_service.c            # Scene activation, favorites
 |   |   +-- ui_color_panel.c           # Color picker widget
@@ -250,12 +248,12 @@ Adjust GPIO assignments and timings in `main/waveshare_rgb_lcd_port.h` to match 
 
 ### Touch Controller
 
-GT911 I2C pins documented in `GT911_PINS.md`. Default configuration:
+GT911 communicates over I2C. Pin assignments are in `main/waveshare_rgb_lcd_port.h` (pulled from `sdkconfig` macros). Default configuration:
 
-- SCL: GPIO 9
-- SDA: GPIO 8
-- RST: GPIO 4
-- INT: GPIO -1 (unused)
+- SCL: GPIO 9 (`I2C_MASTER_SCL_IO`)
+- SDA: GPIO 8 (`I2C_MASTER_SDA_IO`)
+- RST: GPIO 4 (`TOUCH_RST_GPIO`) — toggled during startup
+- INT: GPIO -1 (unused, `EXAMPLE_PIN_NUM_TOUCH_INT`)
 
 ### PSRAM Configuration
 
@@ -389,11 +387,13 @@ if (light_should_skip(e->friendly_name)) { slot++; continue; }
 
 Skipped slots have NULL widget pointers; all `tabbed_ui_update_*()` functions guard against this.
 
-## Troubleshooting Reference
+## Release Checklist
 
-- `TROUBLESHOOTING.md` - Common issues and solutions
-- `FAQ.md` - Frequently asked questions
-- `RELEASE_CHECKLIST.md` - Release process checklist
+- [ ] Version bumped and `CHANGELOG.md` updated
+- [ ] `sdkconfig.defaults` regenerated: `idf.py menuconfig && idf.py save-defconfig`
+- [ ] Git tag created and pushed
+- [ ] `idf.py fullclean build` succeeds from clean clone
+- [ ] Smoke test run on hardware (24h soak preferred)
 
 ## ESP-IDF Version Requirement
 

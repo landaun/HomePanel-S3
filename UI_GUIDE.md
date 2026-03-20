@@ -7,7 +7,7 @@ content area that you swipe between.
 
 ```
 +----------------------------------------------------------+
-|  WiFi: Connected    HA: Connected           [bat 94%]    |  <- status bar (30px)
+|  WiFi: Connected         HA: Connected                   |  <- status bar (30px)
 +--[ Lights ]--[ Temp ]--[ Climate ]--[ Media ]--[ Scenes ]-+  <- tab header (44px)
 |                                                          |
 |                   <page content>                         |  <- tileview (rest of screen)
@@ -62,7 +62,7 @@ Each media player gets a card with:
 
 - Speaker name
 - Now-playing title (or blank when idle)
-- `[ > ]` / `[ || ]` play/pause button
+- Play/pause button
 - Volume slider (0–100%)
 
 Tap the play/pause button to toggle playback. Drag the volume slider to set volume.
@@ -70,7 +70,7 @@ Tap the play/pause button to toggle playback. Drag the volume slider to set volu
 ### Scenes & Automations
 
 Each scene and automation gets a button card. Tap to activate the scene or trigger the
-automation. Long-press to toggle its favorite status (stored in NVS, persists across reboots).
+automation. Disabled automations are hidden. Only the first 20 scenes and 20 automations are shown.
 
 ## Status Bar
 
@@ -80,7 +80,6 @@ automation. Long-press to toggle its favorite status (stored in NVS, persists ac
 | WiFi dot (red) | Wi-Fi disconnected |
 | HA dot (teal) | Home Assistant API reachable |
 | HA dot (red) | Home Assistant unreachable |
-| Battery % | Current battery level (if hardware fitted) |
 
 ## Offline Badge
 
