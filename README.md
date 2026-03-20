@@ -7,6 +7,20 @@ HomePanel-S3 is a Wi-Fi-connected touch panel for Home Assistant, built on the E
 ![Framework](https://img.shields.io/badge/framework-ESP--IDF%20v5.5.0-red.svg)
 ![UI](https://img.shields.io/badge/UI-LVGL%20v8.3-green.svg)
 
+## Screenshots
+
+| Lights | Temperature |
+|--------|-------------|
+| ![Lights page](docs/screenshots/IMG_1426.JPG) | ![Temperature page](docs/screenshots/IMG_1425.JPG) |
+
+| Climate | Occupancy |
+|---------|-----------|
+| ![Climate page](docs/screenshots/IMG_1424.JPG) | ![Occupancy page](docs/screenshots/IMG_1423.JPG) |
+
+| Media |
+|-------|
+| ![Media page](docs/screenshots/IMG_1422.JPG) |
+
 ## Key Features
 
 - **Auto-Discovery:** Fetches all entities from Home Assistant at boot, categorizes by domain (lights, temperature, climate, occupancy, media, scenes) — no manual entity configuration needed.
