@@ -1,0 +1,10 @@
+# Sets environment variables required by the touch-panel firmware.
+# Copy this file to set-env.ps1, edit the values below to match your
+# network and Home Assistant instance, then run `.\scripts\set-env.ps1`
+# in each PowerShell session before building or flashing.
+
+$env:WIFI_SSID = "your-wifi-ssid"
+$env:WIFI_PASSWORD = "your-wifi-password"
+$env:HA_URL = "http://your-homeassistant:8123"
+$env:HA_BASE_URL = $env:HA_URL
+$env:HA_TOKEN = "your-long-lived-access-token"

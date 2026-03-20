@@ -1,0 +1,28 @@
+name: Documentation Request
+description: Suggest improvements or report issues in docs
+labels: [documentation]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Brief description of the documentation update.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: What should be clarified or added?
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Relevant version or environment details.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Links or references.

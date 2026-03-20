@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Lint Markdown
+        run: |
+          npm install -g markdownlint-cli
+          markdownlint *.md docs/*.md
+      - name: Check formatting
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+          find main components/cjson \( -name '*.c' -o -name '*.h' \) -print0 | \
+            xargs -0 clang-format --style=file --dry-run --Werror
+      - name: Install ESP-IDF
+        uses: espressif/install-esp-idf-action@v1
+        with:
+          version: latest
+      - name: Install Python deps
+        run: |
+          $IDF_PYTHON_ENV_PATH/bin/python -m pip install idf-component-manager
+      - name: Build firmware
+        run: |
+          idf.py reconfigure
+          git diff --exit-code dependencies.lock sdkconfig
+          idf.py build
+      - name: Run unit tests
+        run: |
+          set -o pipefail
+          idf.py test 2>&1 | tee test.log
+      - name: Upload test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-log
+          path: test.log

@@ -1,0 +1,29 @@
+# Development environment directories
+.idea/
+.venv/
+venv/
+.cache/
+
+# Local build outputs
+dist/
+tmp/
+out/
+build/
+managed_components/
+
+# Generated project configuration. Use sdkconfig.defaults for reproducible builds.
+sdkconfig
+sdkconfig.old
+dependencies.lock
+
+# Credentials (never commit actual values)
+scripts/set-env.ps1
+
+# Local development snapshots — not part of the project source
+ha_entities.json
+
+# Claude Code internal tooling
+.claude/
+
+# Machine-specific VSCode settings (ESP-IDF paths differ per machine)
+.vscode/settings.json

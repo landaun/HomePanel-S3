@@ -1,0 +1,16 @@
+{
+  "_note": "DEPRECATED. The firmware now uses HA auto-discovery (see discovery.c). Entities are fetched from /api/states at runtime and categorized automatically by domain. This file is kept for reference only and is no longer read by the firmware.",
+  "lighting": [
+    { "name": "Living Room", "entity": "light.living_room", "script": "" },
+    { "name": "Bedroom", "entity": "light.bedroom", "script": "" }
+  ],
+  "temperature": [
+    { "name": "Living Room", "entity": "sensor.living_room_temperature" },
+    { "name": "Bedroom", "entity": "sensor.bedroom_temperature" },
+    { "name": "Thermostat", "entity": "climate.living_room" }
+  ],
+  "occupancy": [
+    { "name": "Living Room", "entity": "binary_sensor.living_room_occupancy" },
+    { "name": "Bedroom", "entity": "binary_sensor.bedroom_occupancy" }
+  ]
+}
