@@ -11,7 +11,7 @@ HomePanel-S3 is a Wi-Fi-connected touch panel for Home Assistant, built on the E
 
 | Lights | Temperature |
 |--------|-------------|
-| ![Lights page](docs/screenshots/IMG_1426.JPG) | ![Temperature page](docs/screenshots/IMG_1425.JPG) |
+| ![Lights page](docs/screenshots/IMG_1422.JPG)| ![Temperature page](docs/screenshots/IMG_1425.JPG) |
 
 | Climate | Occupancy |
 |---------|-----------|
@@ -19,7 +19,7 @@ HomePanel-S3 is a Wi-Fi-connected touch panel for Home Assistant, built on the E
 
 | Media |
 |-------|
-| ![Media page](docs/screenshots/IMG_1422.JPG) |
+| ![Media page](docs/screenshots/IMG_1426.JPG) |
 
 ## Key Features
 
