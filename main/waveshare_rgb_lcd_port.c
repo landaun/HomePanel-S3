@@ -201,7 +201,7 @@ esp_err_t waveshare_esp32_s3_rgb_lcd_init()
     // Register callbacks for RGB panel events
     esp_lcd_rgb_panel_event_callbacks_t cbs = {
 #if EXAMPLE_RGB_BOUNCE_BUFFER_SIZE > 0
-        .on_frame_buf_complete = rgb_lcd_on_vsync_event, // Callback for frame buffer completion event
+        .on_frame_buf_complete = rgb_lcd_on_vsync_event, // FB completion callback
 #else
         .on_vsync = rgb_lcd_on_vsync_event, // Callback for vertical sync
 #endif
