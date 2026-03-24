@@ -457,8 +457,8 @@ static void panel_start_task(void* param)
 
 void app_main(void)
 {
-    const BaseType_t created = xTaskCreatePinnedToCore(panel_start_task, "panel_main", 8192, NULL, 5,
-                                                       NULL, 1);
+    const BaseType_t created =
+        xTaskCreatePinnedToCore(panel_start_task, "panel_main", 8192, NULL, 5, NULL, 1);
     if (created != pdPASS)
     {
         ESP_LOGE(PANEL_TAG, "Failed to create panel_main task");
