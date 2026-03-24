@@ -5,7 +5,7 @@
 The panel shows a fixed status bar at the top, a row of tab buttons below it, and a full-screen
 content area that you swipe between.
 
-```
+```text
 +----------------------------------------------------------+
 |  WiFi: Connected         HA: Connected                   |  <- status bar (30px)
 +--[ Lights ]--[ Temp ]--[ Climate ]--[ Media ]--[ Scenes ]-+  <- tab header (44px)
