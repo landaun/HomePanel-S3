@@ -503,8 +503,8 @@ static lv_disp_t* display_init(esp_lcd_panel_handle_t panel_handle)
     disp_drv.hor_res = LVGL_PORT_V_RES; // Set horizontal resolution for rotation
     disp_drv.ver_res = LVGL_PORT_H_RES; // Set vertical resolution for rotation
 #else
-    disp_drv.hor_res = LVGL_PORT_H_RES;                // Set horizontal resolution
-    disp_drv.ver_res = LVGL_PORT_V_RES;                // Set vertical resolution
+    disp_drv.hor_res = LVGL_PORT_H_RES; // Set horizontal resolution
+    disp_drv.ver_res = LVGL_PORT_V_RES; // Set vertical resolution
 #endif
     disp_drv.flush_cb = flush_callback; // Set the flush callback
     disp_drv.draw_buf = &disp_buf;      // Set the draw buffer
@@ -512,7 +512,7 @@ static lv_disp_t* display_init(esp_lcd_panel_handle_t panel_handle)
 #if LVGL_PORT_FULL_REFRESH
     disp_drv.full_refresh = 1; // Enable full refresh
 #elif LVGL_PORT_DIRECT_MODE
-    disp_drv.direct_mode = 1;                          // Enable direct mode
+    disp_drv.direct_mode = 1; // Enable direct mode
 #endif
     return lv_disp_drv_register(&disp_drv); // Register the display driver
 }
@@ -626,8 +626,8 @@ esp_err_t lvgl_port_init(esp_lcd_panel_handle_t lcd_handle, esp_lcd_touch_handle
         esp_lcd_touch_set_swap_xy(tp_handle, true);  // Swap X and Y coordinates
         esp_lcd_touch_set_mirror_y(tp_handle, true); // Mirror Y coordinates
 #elif EXAMPLE_LVGL_PORT_ROTATION_180
-        esp_lcd_touch_set_mirror_x(tp_handle, true);   // Mirror X coordinates
-        esp_lcd_touch_set_mirror_y(tp_handle, true);   // Mirror Y coordinates
+        esp_lcd_touch_set_mirror_x(tp_handle, true); // Mirror X coordinates
+        esp_lcd_touch_set_mirror_y(tp_handle, true); // Mirror Y coordinates
 #elif EXAMPLE_LVGL_PORT_ROTATION_270
         esp_lcd_touch_set_swap_xy(tp_handle, true);  // Swap X and Y coordinates
         esp_lcd_touch_set_mirror_x(tp_handle, true); // Mirror X coordinates
