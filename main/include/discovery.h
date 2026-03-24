@@ -11,8 +11,10 @@
 #define DISC_MAX_AREA_ID 48
 #define DISC_MAX_UNIT 16
 #define DISC_MAX_DEVICE_CLASS 32
-#define DISC_MAX_ENTITIES 200 // max total entities across all domains
-#define DISC_MAX_PER_DOMAIN 50 // max entities per NVS key (fits within 4000B limit)
+// Max total entities across all domains
+#define DISC_MAX_ENTITIES 200
+// Max entities per NVS key (fits within 4000B limit)
+#define DISC_MAX_PER_DOMAIN 50
 
 // Entity domain categories — each becomes one swipeable page
 typedef enum
