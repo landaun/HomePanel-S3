@@ -48,23 +48,7 @@
 #define I2C_MASTER_NUM                                                                             \
     0 /*!< I2C master i2c port number, the number of i2c peripheral interfaces available will      \
          depend on the chip */
-#define I2C_MASTER_FREQ_HZ 400000   /*!< I2C master clock frequency */
-#define I2C_MASTER_TX_BUF_DISABLE 0 /*!< I2C master doesn't need buffer */
-#define I2C_MASTER_RX_BUF_DISABLE 0 /*!< I2C master doesn't need buffer */
-#define I2C_MASTER_TIMEOUT_MS 1000
-
-#define TOUCH_RST_GPIO CONFIG_EXAMPLE_PIN_NUM_TOUCH_RST
-#define TOUCH_RST_GPIO_SEL (1ULL << TOUCH_RST_GPIO)
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////// Please update the following configuration according to your LCD spec
-/////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define EXAMPLE_LCD_H_RES (LVGL_PORT_H_RES)
-#define EXAMPLE_LCD_V_RES (LVGL_PORT_V_RES)
-#define EXAMPLE_LCD_PIXEL_CLOCK_HZ (16 * 1000 * 1000)
-#define EXAMPLE_LCD_BIT_PER_PIXEL (16)
-#define EXAMPLE_RGB_BIT_PER_PIXEL (16)
-#define EXAMPLE_RGB_DATA_WIDTH (16)
+#define I2C_MASTER_FREQ_HZ 400000 /*!< I2C master clock frequency */
 #define EXAMPLE_RGB_BOUNCE_BUFFER_SIZE                                                             \
     (EXAMPLE_LCD_H_RES * CONFIG_EXAMPLE_LCD_RGB_BOUNCE_BUFFER_HEIGHT)
 #define EXAMPLE_LCD_IO_RGB_DISP (-1) // -1 if not used

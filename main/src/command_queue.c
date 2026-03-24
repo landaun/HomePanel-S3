@@ -57,7 +57,8 @@ static void command_worker(void* arg)
         switch (cmd.type)
         {
         case HA_CMD_SERVICE:
-            ESP_LOGI(TAG, "Processing HA_CMD_SERVICE: domain=%s, service=%s", cmd.domain, cmd.service);
+            ESP_LOGI(TAG, "Processing HA_CMD_SERVICE: domain=%s, service=%s", cmd.domain,
+                     cmd.service);
             err = ha_client_call_service(cmd.domain, cmd.service, cmd.data);
             break;
         case HA_CMD_LIGHT:
@@ -158,7 +159,8 @@ bool command_queue_enqueue(const ha_cmd_t* cmd)
     }
     else
     {
-        ESP_LOGE(TAG, "<<< command_queue_enqueue: FAILED - xQueueSend returned %d (queue full?)", result);
+        ESP_LOGE(TAG, "<<< command_queue_enqueue: FAILED - xQueueSend returned %d (queue full?)",
+                 result);
         ESP_LOGE(TAG, "    Queue spaces available: %d", (int)uxQueueSpacesAvailable(cmd_queue));
         return false;
     }
@@ -181,8 +183,8 @@ bool command_queue_enqueue_light(const char* entity_id, const cJSON* params)
     strncpy(cmd.entity_id, entity_id, sizeof(cmd.entity_id) - 1);
     cmd.entity_id[sizeof(cmd.entity_id) - 1] = '\0';
 
-    ESP_LOGI(TAG, "Calling command_queue_enqueue with cmd.type=%d, cmd.entity_id='%s'",
-             cmd.type, cmd.entity_id);
+    ESP_LOGI(TAG, "Calling command_queue_enqueue with cmd.type=%d, cmd.entity_id='%s'", cmd.type,
+             cmd.entity_id);
 
     bool result = command_queue_enqueue(&cmd);
     ESP_LOGI(TAG, "<<< command_queue_enqueue_light result: %s", result ? "true" : "false");
@@ -271,7 +273,8 @@ bool command_queue_enqueue_light_effect(const char* entity_id, const char* effec
 
 bool command_queue_enqueue_light_on(const char* entity_id)
 {
-    ESP_LOGI(TAG, ">>> command_queue_enqueue_light_on: entity='%s'", entity_id ? entity_id : "NULL");
+    ESP_LOGI(TAG, ">>> command_queue_enqueue_light_on: entity='%s'",
+             entity_id ? entity_id : "NULL");
     bool result = command_queue_enqueue_light(entity_id, NULL);
     ESP_LOGI(TAG, "<<< command_queue_enqueue_light_on result: %s", result ? "true" : "false");
     return result;
@@ -279,7 +282,8 @@ bool command_queue_enqueue_light_on(const char* entity_id)
 
 bool command_queue_enqueue_light_off(const char* entity_id)
 {
-    ESP_LOGI(TAG, ">>> command_queue_enqueue_light_off: entity='%s'", entity_id ? entity_id : "NULL");
+    ESP_LOGI(TAG, ">>> command_queue_enqueue_light_off: entity='%s'",
+             entity_id ? entity_id : "NULL");
     if (!entity_id)
     {
         ESP_LOGE(TAG, "<<< command_queue_enqueue_light_off: NULL entity_id");

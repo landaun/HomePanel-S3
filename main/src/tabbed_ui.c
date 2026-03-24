@@ -19,15 +19,15 @@ static const char* TAG = "tabbed_ui";
 // Constants
 // -------------------------------------------------------------------------
 
-#define STATUS_BAR_H   30
-#define TAB_HEADER_H   44
-#define SCREEN_W       800
-#define SCREEN_H       480
-#define TILEVIEW_Y     (STATUS_BAR_H + TAB_HEADER_H)
-#define TILEVIEW_H     (SCREEN_H - TILEVIEW_Y)
+#define STATUS_BAR_H 30
+#define TAB_HEADER_H 44
+#define SCREEN_W 800
+#define SCREEN_H 480
+#define TILEVIEW_Y (STATUS_BAR_H + TAB_HEADER_H)
+#define TILEVIEW_H (SCREEN_H - TILEVIEW_Y)
 
 // Tab button highlight colors
-#define TAB_ACTIVE_COLOR   UI_COLOR_ACCENT_TEAL
+#define TAB_ACTIVE_COLOR UI_COLOR_ACCENT_TEAL
 #define TAB_INACTIVE_COLOR UI_COLOR_SECONDARY_TEXT
 
 // -------------------------------------------------------------------------
@@ -55,21 +55,21 @@ typedef struct
 // Module state
 // -------------------------------------------------------------------------
 
-static lv_obj_t* s_tab_header    = NULL;
-static lv_obj_t* s_tileview      = NULL;
+static lv_obj_t* s_tab_header = NULL;
+static lv_obj_t* s_tileview = NULL;
 static lv_obj_t* s_offline_badge = NULL;
-static bool      s_initialized   = false;
+static bool s_initialized = false;
 
 status_widgets_t g_status = {0};
 
 // Per-domain widget arrays (PSRAM)
 static tab_widget_t* s_widgets[DISC_DOMAIN_COUNT] = {0};
-static size_t        s_widget_counts[DISC_DOMAIN_COUNT] = {0};
+static size_t s_widget_counts[DISC_DOMAIN_COUNT] = {0};
 
 // Tab button objects — one per active page (max DISC_DOMAIN_COUNT pages)
 static lv_obj_t* s_tab_buttons[DISC_DOMAIN_COUNT] = {0};
-static int       s_tab_domain[DISC_DOMAIN_COUNT]  = {0}; // domain for each tab index
-static size_t    s_tab_count = 0;
+static int s_tab_domain[DISC_DOMAIN_COUNT] = {0}; // domain for each tab index
+static size_t s_tab_count = 0;
 
 // (no modal state — climate controls are inline on each card)
 
@@ -109,16 +109,20 @@ static void btn_delete_cb(lv_event_t* e);
 
 static const char* get_room_icon(const char* name)
 {
-    if (!name) return ICON_LIGHTBULB;
+    if (!name)
+        return ICON_LIGHTBULB;
     char lower[64];
     size_t i;
     for (i = 0; name[i] && i < sizeof(lower) - 1; i++)
         lower[i] = (name[i] >= 'A' && name[i] <= 'Z') ? name[i] + 32 : name[i];
     lower[i] = '\0';
 
-    if (strstr(lower, "office")) return ICON_BRIEFCASE;
-    if (strstr(lower, "dining")) return ICON_UTENSILS;
-    if (strstr(lower, "fire"))   return ICON_FIRE;
+    if (strstr(lower, "office"))
+        return ICON_BRIEFCASE;
+    if (strstr(lower, "dining"))
+        return ICON_UTENSILS;
+    if (strstr(lower, "fire"))
+        return ICON_FIRE;
     return ICON_LIGHTBULB;
 }
 
@@ -129,19 +133,23 @@ static const char* get_room_icon(const char* name)
 // Returns true if the name ends with a digit (optionally with trailing spaces)
 static bool name_ends_with_number(const char* name)
 {
-    if (!name || name[0] == '\0') return false;
+    if (!name || name[0] == '\0')
+        return false;
     size_t len = strlen(name);
-    while (len > 0 && name[len - 1] == ' ') len--;
+    while (len > 0 && name[len - 1] == ' ')
+        len--;
     return (len > 0 && name[len - 1] >= '0' && name[len - 1] <= '9');
 }
 
 // Case-insensitive substring search
 static bool name_contains_ci(const char* name, const char* needle)
 {
-    if (!name || !needle || needle[0] == '\0') return false;
+    if (!name || !needle || needle[0] == '\0')
+        return false;
     size_t nl = strlen(needle);
     size_t sl = strlen(name);
-    if (nl > sl) return false;
+    if (nl > sl)
+        return false;
     for (size_t i = 0; i <= sl - nl; i++)
     {
         size_t j;
@@ -149,11 +157,15 @@ static bool name_contains_ci(const char* name, const char* needle)
         {
             char nc = name[i + j];
             char hc = needle[j];
-            if (nc >= 'A' && nc <= 'Z') nc += 32;
-            if (hc >= 'A' && hc <= 'Z') hc += 32;
-            if (nc != hc) break;
+            if (nc >= 'A' && nc <= 'Z')
+                nc += 32;
+            if (hc >= 'A' && hc <= 'Z')
+                hc += 32;
+            if (nc != hc)
+                break;
         }
-        if (j == nl) return true;
+        if (j == nl)
+            return true;
     }
     return false;
 }
@@ -162,7 +174,8 @@ static bool name_contains_ci(const char* name, const char* needle)
 // keywords_csv is a string literal like "desk,rack,strip" from Kconfig.
 static bool name_matches_csv(const char* name, const char* keywords_csv)
 {
-    if (!keywords_csv || keywords_csv[0] == '\0') return false;
+    if (!keywords_csv || keywords_csv[0] == '\0')
+        return false;
     // Work on a stack copy to avoid modifying the literal
     char buf[256];
     snprintf(buf, sizeof(buf), "%s", keywords_csv);
@@ -171,7 +184,8 @@ static bool name_matches_csv(const char* name, const char* keywords_csv)
     while (tok)
     {
         // Trim leading spaces from token
-        while (*tok == ' ') tok++;
+        while (*tok == ' ')
+            tok++;
         if (*tok && name_contains_ci(name, tok))
             return true;
         tok = strtok_r(NULL, ",", &saveptr);
@@ -221,9 +235,11 @@ static void update_tab_highlight(size_t active_tab)
 {
     for (size_t i = 0; i < s_tab_count; i++)
     {
-        if (!s_tab_buttons[i]) continue;
+        if (!s_tab_buttons[i])
+            continue;
         lv_obj_t* lbl = lv_obj_get_child(s_tab_buttons[i], 0);
-        if (!lbl) continue;
+        if (!lbl)
+            continue;
         lv_color_t color = (i == active_tab) ? TAB_ACTIVE_COLOR : TAB_INACTIVE_COLOR;
         lv_obj_set_style_text_color(lbl, color, 0);
 
@@ -356,11 +372,15 @@ static lv_obj_t* make_card(lv_obj_t* parent, bool half_width)
 static void build_lights_page(lv_obj_t* tile, const disc_result_t* disc, size_t domain_idx)
 {
     size_t count = disc->domain_counts[DISC_DOMAIN_LIGHT];
-    s_widgets[DISC_DOMAIN_LIGHT] = heap_caps_calloc(count, sizeof(tab_widget_t),
-                                                    MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    s_widgets[DISC_DOMAIN_LIGHT] =
+        heap_caps_calloc(count, sizeof(tab_widget_t), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     if (!s_widgets[DISC_DOMAIN_LIGHT])
         s_widgets[DISC_DOMAIN_LIGHT] = calloc(count, sizeof(tab_widget_t));
-    if (!s_widgets[DISC_DOMAIN_LIGHT]) { ESP_LOGE(TAG, "OOM lights"); return; }
+    if (!s_widgets[DISC_DOMAIN_LIGHT])
+    {
+        ESP_LOGE(TAG, "OOM lights");
+        return;
+    }
     s_widget_counts[DISC_DOMAIN_LIGHT] = count;
 
     lv_obj_t* cont = make_tile_grid_container(tile);
@@ -369,8 +389,13 @@ static void build_lights_page(lv_obj_t* tile, const disc_result_t* disc, size_t 
     for (size_t i = 0; i < disc->count && slot < count; i++)
     {
         const disc_entity_t* e = &disc->entities[i];
-        if (e->domain != DISC_DOMAIN_LIGHT) continue;
-        if (light_should_skip(e->friendly_name)) { slot++; continue; }
+        if (e->domain != DISC_DOMAIN_LIGHT)
+            continue;
+        if (light_should_skip(e->friendly_name))
+        {
+            slot++;
+            continue;
+        }
 
         tab_widget_t* w = &s_widgets[DISC_DOMAIN_LIGHT][slot];
         snprintf(w->entity_id, sizeof(w->entity_id), "%s", e->entity_id);
@@ -425,11 +450,15 @@ static void build_lights_page(lv_obj_t* tile, const disc_result_t* disc, size_t 
 static void build_temperature_page(lv_obj_t* tile, const disc_result_t* disc, size_t domain_idx)
 {
     size_t count = disc->domain_counts[DISC_DOMAIN_TEMPERATURE];
-    s_widgets[DISC_DOMAIN_TEMPERATURE] = heap_caps_calloc(count, sizeof(tab_widget_t),
-                                                          MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    s_widgets[DISC_DOMAIN_TEMPERATURE] =
+        heap_caps_calloc(count, sizeof(tab_widget_t), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     if (!s_widgets[DISC_DOMAIN_TEMPERATURE])
         s_widgets[DISC_DOMAIN_TEMPERATURE] = calloc(count, sizeof(tab_widget_t));
-    if (!s_widgets[DISC_DOMAIN_TEMPERATURE]) { ESP_LOGE(TAG, "OOM temps"); return; }
+    if (!s_widgets[DISC_DOMAIN_TEMPERATURE])
+    {
+        ESP_LOGE(TAG, "OOM temps");
+        return;
+    }
     s_widget_counts[DISC_DOMAIN_TEMPERATURE] = count;
 
     lv_obj_t* cont = make_tile_grid_container(tile);
@@ -438,8 +467,13 @@ static void build_temperature_page(lv_obj_t* tile, const disc_result_t* disc, si
     for (size_t i = 0; i < disc->count && slot < count; i++)
     {
         const disc_entity_t* e = &disc->entities[i];
-        if (e->domain != DISC_DOMAIN_TEMPERATURE) continue;
-        if (temp_should_skip(e->friendly_name)) { slot++; continue; }
+        if (e->domain != DISC_DOMAIN_TEMPERATURE)
+            continue;
+        if (temp_should_skip(e->friendly_name))
+        {
+            slot++;
+            continue;
+        }
 
         tab_widget_t* w = &s_widgets[DISC_DOMAIN_TEMPERATURE][slot];
         snprintf(w->entity_id, sizeof(w->entity_id), "%s", e->entity_id);
@@ -475,11 +509,15 @@ static void build_temperature_page(lv_obj_t* tile, const disc_result_t* disc, si
 static void build_climate_page(lv_obj_t* tile, const disc_result_t* disc, size_t domain_idx)
 {
     size_t count = disc->domain_counts[DISC_DOMAIN_CLIMATE];
-    s_widgets[DISC_DOMAIN_CLIMATE] = heap_caps_calloc(count, sizeof(tab_widget_t),
-                                                      MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    s_widgets[DISC_DOMAIN_CLIMATE] =
+        heap_caps_calloc(count, sizeof(tab_widget_t), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     if (!s_widgets[DISC_DOMAIN_CLIMATE])
         s_widgets[DISC_DOMAIN_CLIMATE] = calloc(count, sizeof(tab_widget_t));
-    if (!s_widgets[DISC_DOMAIN_CLIMATE]) { ESP_LOGE(TAG, "OOM climate"); return; }
+    if (!s_widgets[DISC_DOMAIN_CLIMATE])
+    {
+        ESP_LOGE(TAG, "OOM climate");
+        return;
+    }
     s_widget_counts[DISC_DOMAIN_CLIMATE] = count;
 
     lv_obj_t* cont = make_tile_scroll_container(tile);
@@ -488,7 +526,8 @@ static void build_climate_page(lv_obj_t* tile, const disc_result_t* disc, size_t
     for (size_t i = 0; i < disc->count && slot < count; i++)
     {
         const disc_entity_t* e = &disc->entities[i];
-        if (e->domain != DISC_DOMAIN_CLIMATE) continue;
+        if (e->domain != DISC_DOMAIN_CLIMATE)
+            continue;
 
         tab_widget_t* w = &s_widgets[DISC_DOMAIN_CLIMATE][slot];
         snprintf(w->entity_id, sizeof(w->entity_id), "%s", e->entity_id);
@@ -505,8 +544,7 @@ static void build_climate_page(lv_obj_t* tile, const disc_result_t* disc, size_t
         lv_obj_set_height(top, LV_SIZE_CONTENT);
         lv_obj_set_layout(top, LV_LAYOUT_FLEX);
         lv_obj_set_flex_flow(top, LV_FLEX_FLOW_ROW);
-        lv_obj_set_flex_align(top, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER,
-                              LV_FLEX_ALIGN_CENTER);
+        lv_obj_set_flex_align(top, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
         lv_obj_set_style_bg_opa(top, LV_OPA_TRANSP, 0);
         lv_obj_set_style_pad_gap(top, 8, 0);
 
@@ -568,7 +606,7 @@ static void build_climate_page(lv_obj_t* tile, const disc_result_t* disc, size_t
         lv_obj_set_style_bg_opa(plus_btn, LV_OPA_COVER, 0);
         lv_obj_set_style_radius(plus_btn, 8, 0);
         lv_obj_set_user_data(plus_btn, w);
-        lv_obj_add_event_cb(plus_btn, climate_temp_btn_cb, LV_EVENT_CLICKED, (void*)(intptr_t)+1);
+        lv_obj_add_event_cb(plus_btn, climate_temp_btn_cb, LV_EVENT_CLICKED, (void*)(intptr_t) + 1);
         lv_obj_t* plus_lbl = lv_label_create(plus_btn);
         lv_label_set_text(plus_lbl, "+");
         lv_obj_add_style(plus_lbl, ui_style_value_primary(), 0);
@@ -583,11 +621,15 @@ static void build_climate_page(lv_obj_t* tile, const disc_result_t* disc, size_t
 static void build_occupancy_page(lv_obj_t* tile, const disc_result_t* disc, size_t domain_idx)
 {
     size_t count = disc->domain_counts[DISC_DOMAIN_OCCUPANCY];
-    s_widgets[DISC_DOMAIN_OCCUPANCY] = heap_caps_calloc(count, sizeof(tab_widget_t),
-                                                        MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    s_widgets[DISC_DOMAIN_OCCUPANCY] =
+        heap_caps_calloc(count, sizeof(tab_widget_t), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     if (!s_widgets[DISC_DOMAIN_OCCUPANCY])
         s_widgets[DISC_DOMAIN_OCCUPANCY] = calloc(count, sizeof(tab_widget_t));
-    if (!s_widgets[DISC_DOMAIN_OCCUPANCY]) { ESP_LOGE(TAG, "OOM occ"); return; }
+    if (!s_widgets[DISC_DOMAIN_OCCUPANCY])
+    {
+        ESP_LOGE(TAG, "OOM occ");
+        return;
+    }
     s_widget_counts[DISC_DOMAIN_OCCUPANCY] = count;
 
     lv_obj_t* cont = make_tile_grid_container(tile);
@@ -596,8 +638,13 @@ static void build_occupancy_page(lv_obj_t* tile, const disc_result_t* disc, size
     for (size_t i = 0; i < disc->count && slot < count; i++)
     {
         const disc_entity_t* e = &disc->entities[i];
-        if (e->domain != DISC_DOMAIN_OCCUPANCY) continue;
-        if (occupancy_should_skip(e->friendly_name)) { slot++; continue; }
+        if (e->domain != DISC_DOMAIN_OCCUPANCY)
+            continue;
+        if (occupancy_should_skip(e->friendly_name))
+        {
+            slot++;
+            continue;
+        }
 
         tab_widget_t* w = &s_widgets[DISC_DOMAIN_OCCUPANCY][slot];
         snprintf(w->entity_id, sizeof(w->entity_id), "%s", e->entity_id);
@@ -636,11 +683,15 @@ static void build_occupancy_page(lv_obj_t* tile, const disc_result_t* disc, size
 static void build_media_page(lv_obj_t* tile, const disc_result_t* disc, size_t domain_idx)
 {
     size_t count = disc->domain_counts[DISC_DOMAIN_MEDIA];
-    s_widgets[DISC_DOMAIN_MEDIA] = heap_caps_calloc(count, sizeof(tab_widget_t),
-                                                    MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    s_widgets[DISC_DOMAIN_MEDIA] =
+        heap_caps_calloc(count, sizeof(tab_widget_t), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     if (!s_widgets[DISC_DOMAIN_MEDIA])
         s_widgets[DISC_DOMAIN_MEDIA] = calloc(count, sizeof(tab_widget_t));
-    if (!s_widgets[DISC_DOMAIN_MEDIA]) { ESP_LOGE(TAG, "OOM media"); return; }
+    if (!s_widgets[DISC_DOMAIN_MEDIA])
+    {
+        ESP_LOGE(TAG, "OOM media");
+        return;
+    }
     s_widget_counts[DISC_DOMAIN_MEDIA] = count;
 
     lv_obj_t* cont = make_tile_scroll_container(tile);
@@ -649,7 +700,8 @@ static void build_media_page(lv_obj_t* tile, const disc_result_t* disc, size_t d
     for (size_t i = 0; i < disc->count && slot < count; i++)
     {
         const disc_entity_t* e = &disc->entities[i];
-        if (e->domain != DISC_DOMAIN_MEDIA) continue;
+        if (e->domain != DISC_DOMAIN_MEDIA)
+            continue;
 
         tab_widget_t* w = &s_widgets[DISC_DOMAIN_MEDIA][slot];
         snprintf(w->entity_id, sizeof(w->entity_id), "%s", e->entity_id);
@@ -828,14 +880,27 @@ static void build_page(lv_obj_t* tile, const disc_result_t* disc, disc_domain_t 
 {
     switch (domain)
     {
-        case DISC_DOMAIN_LIGHT:       build_lights_page(tile, disc, domain_idx);      break;
-        case DISC_DOMAIN_TEMPERATURE: build_temperature_page(tile, disc, domain_idx); break;
-        case DISC_DOMAIN_CLIMATE:     build_climate_page(tile, disc, domain_idx);     break;
-        case DISC_DOMAIN_OCCUPANCY:   build_occupancy_page(tile, disc, domain_idx);   break;
-        case DISC_DOMAIN_MEDIA:       build_media_page(tile, disc, domain_idx);       break;
-        case DISC_DOMAIN_SCENE:
-        case DISC_DOMAIN_AUTOMATION:  build_scenes_page(tile, disc);                  break;
-        default: break;
+    case DISC_DOMAIN_LIGHT:
+        build_lights_page(tile, disc, domain_idx);
+        break;
+    case DISC_DOMAIN_TEMPERATURE:
+        build_temperature_page(tile, disc, domain_idx);
+        break;
+    case DISC_DOMAIN_CLIMATE:
+        build_climate_page(tile, disc, domain_idx);
+        break;
+    case DISC_DOMAIN_OCCUPANCY:
+        build_occupancy_page(tile, disc, domain_idx);
+        break;
+    case DISC_DOMAIN_MEDIA:
+        build_media_page(tile, disc, domain_idx);
+        break;
+    case DISC_DOMAIN_SCENE:
+    case DISC_DOMAIN_AUTOMATION:
+        build_scenes_page(tile, disc);
+        break;
+    default:
+        break;
     }
 }
 
@@ -847,14 +912,17 @@ static void climate_temp_btn_cb(lv_event_t* e)
 {
     lv_obj_t* btn = lv_event_get_target(e);
     tab_widget_t* w = (tab_widget_t*)lv_obj_get_user_data(btn);
-    if (!w) return;
+    if (!w)
+        return;
 
     intptr_t delta = (intptr_t)lv_event_get_user_data(e);
     w->target_temp += (float)delta; // +1 or -1 degree F
 
     // Clamp to reasonable thermostat range
-    if (w->target_temp < 60.0f) w->target_temp = 60.0f;
-    if (w->target_temp > 85.0f) w->target_temp = 85.0f;
+    if (w->target_temp < 60.0f)
+        w->target_temp = 60.0f;
+    if (w->target_temp > 85.0f)
+        w->target_temp = 85.0f;
 
     // Update setpoint label immediately
     if (w->toggle)
@@ -889,7 +957,8 @@ static void light_switch_cb(lv_event_t* e)
 {
     lv_obj_t* sw = lv_event_get_target(e);
     tab_widget_t* w = (tab_widget_t*)lv_obj_get_user_data(sw);
-    if (!w) return;
+    if (!w)
+        return;
 
     bool on = lv_obj_has_state(sw, LV_STATE_CHECKED);
     if (on)
@@ -902,7 +971,8 @@ static void light_slider_cb(lv_event_t* e)
 {
     lv_obj_t* slider = lv_event_get_target(e);
     tab_widget_t* w = (tab_widget_t*)lv_obj_get_user_data(slider);
-    if (!w) return;
+    if (!w)
+        return;
 
     int32_t value = lv_slider_get_value(slider);
     if (value > 0 && !w->is_on)
@@ -922,16 +992,16 @@ static void media_play_pause_cb(lv_event_t* e)
 {
     lv_obj_t* btn = lv_event_get_target(e);
     tab_widget_t* w = (tab_widget_t*)lv_obj_get_user_data(btn);
-    if (!w) return;
+    if (!w)
+        return;
 
-    // Toggle based on current icon text (play icon = currently paused, pause icon = currently playing)
-    bool currently_playing = w->play_btn &&
-        strcmp(lv_label_get_text(w->play_btn), ICON_PAUSE) == 0;
+    // Toggle based on current icon text (play icon = paused, pause icon = playing)
+    bool currently_playing = w->play_btn && strcmp(lv_label_get_text(w->play_btn), ICON_PAUSE) == 0;
 
     cJSON* payload = cJSON_CreateObject();
     cJSON_AddStringToObject(payload, "entity_id", w->entity_id);
-    command_queue_enqueue_service("media_player",
-        currently_playing ? "media_pause" : "media_play", payload);
+    command_queue_enqueue_service("media_player", currently_playing ? "media_pause" : "media_play",
+                                  payload);
     cJSON_Delete(payload);
 }
 
@@ -939,7 +1009,8 @@ static void media_volume_cb(lv_event_t* e)
 {
     lv_obj_t* slider = lv_event_get_target(e);
     tab_widget_t* w = (tab_widget_t*)lv_obj_get_user_data(slider);
-    if (!w) return;
+    if (!w)
+        return;
 
     int32_t value = lv_slider_get_value(slider);
     float volume_level = (float)value / 100.0f;
@@ -953,22 +1024,27 @@ static void media_volume_cb(lv_event_t* e)
 
 static void scene_btn_cb(lv_event_t* e)
 {
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_CLICKED)
+        return;
     const char* eid = (const char*)lv_obj_get_user_data(lv_event_get_target(e));
-    if (eid) scene_service_trigger_scene(eid);
+    if (eid)
+        scene_service_trigger_scene(eid);
 }
 
 static void automation_btn_cb(lv_event_t* e)
 {
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_CLICKED)
+        return;
     const char* eid = (const char*)lv_obj_get_user_data(lv_event_get_target(e));
-    if (eid) scene_service_trigger_automation(eid);
+    if (eid)
+        scene_service_trigger_automation(eid);
 }
 
 static void btn_delete_cb(lv_event_t* e)
 {
     char* eid = (char*)lv_event_get_user_data(e);
-    if (eid) lv_mem_free(eid);
+    if (eid)
+        lv_mem_free(eid);
 }
 
 // -------------------------------------------------------------------------
@@ -1013,7 +1089,8 @@ static void build_ui_internal(const disc_result_t* disc)
     g_status.api_indicator = lv_obj_create(g_status.status_bar);
     lv_obj_remove_style_all(g_status.api_indicator);
     lv_obj_add_style(g_status.api_indicator, ui_style_status_indicator(), 0);
-    lv_obj_align_to(g_status.api_indicator, g_status.wifi_indicator, LV_ALIGN_OUT_RIGHT_MID, 160, 0);
+    lv_obj_align_to(g_status.api_indicator, g_status.wifi_indicator, LV_ALIGN_OUT_RIGHT_MID, 160,
+                    0);
 
     g_status.api_label = lv_label_create(g_status.status_bar);
     lv_obj_add_style(g_status.api_label, ui_style_value_secondary(), 0);
@@ -1055,7 +1132,8 @@ static void build_ui_internal(const disc_result_t* disc)
         // Scene and automation share one tab
         if (domain == DISC_DOMAIN_SCENE || domain == DISC_DOMAIN_AUTOMATION)
         {
-            if (scenes_added) continue;
+            if (scenes_added)
+                continue;
             // Check if either has entities
             if (disc->domain_counts[DISC_DOMAIN_SCENE] == 0 &&
                 disc->domain_counts[DISC_DOMAIN_AUTOMATION] == 0)
@@ -1071,9 +1149,11 @@ static void build_ui_internal(const disc_result_t* disc)
         }
 
         // Switches page is intentionally omitted (smart plugs — risk of accidental toggle)
-        if (domain == DISC_DOMAIN_SWITCH) continue;
+        if (domain == DISC_DOMAIN_SWITCH)
+            continue;
 
-        if (disc->domain_counts[domain] == 0) continue;
+        if (disc->domain_counts[domain] == 0)
+            continue;
 
         lv_obj_t* tile = lv_tileview_add_tile(s_tileview, (uint8_t)tab_idx, 0, LV_DIR_HOR);
         build_page(tile, disc, domain, tab_idx);
@@ -1129,10 +1209,7 @@ void tabbed_ui_rebuild(const disc_result_t* disc)
     tabbed_ui_create(disc);
 }
 
-bool tabbed_ui_ready(void)
-{
-    return s_initialized;
-}
+bool tabbed_ui_ready(void) { return s_initialized; }
 
 // -------------------------------------------------------------------------
 // State update functions
@@ -1140,15 +1217,18 @@ bool tabbed_ui_ready(void)
 
 void tabbed_ui_update_light(size_t slot, bool on, uint8_t brightness)
 {
-    if (slot >= s_widget_counts[DISC_DOMAIN_LIGHT] || !s_widgets[DISC_DOMAIN_LIGHT]) return;
-    if (!s_initialized || !lv_is_initialized()) return;
+    if (slot >= s_widget_counts[DISC_DOMAIN_LIGHT] || !s_widgets[DISC_DOMAIN_LIGHT])
+        return;
+    if (!s_initialized || !lv_is_initialized())
+        return;
 
     tab_widget_t* w = &s_widgets[DISC_DOMAIN_LIGHT][slot];
     w->is_on = on;
     w->brightness = brightness;
     w->has_value = true;
 
-    if (!lvgl_port_lock(-1)) return;
+    if (!lvgl_port_lock(-1))
+        return;
 
     // Update icon color
     if (w->label)
@@ -1159,8 +1239,10 @@ void tabbed_ui_update_light(size_t slot, bool on, uint8_t brightness)
     // Update toggle
     if (w->toggle)
     {
-        if (on) lv_obj_add_state(w->toggle, LV_STATE_CHECKED);
-        else    lv_obj_clear_state(w->toggle, LV_STATE_CHECKED);
+        if (on)
+            lv_obj_add_state(w->toggle, LV_STATE_CHECKED);
+        else
+            lv_obj_clear_state(w->toggle, LV_STATE_CHECKED);
     }
     // Update slider
     if (w->slider)
@@ -1173,13 +1255,15 @@ void tabbed_ui_update_temperature(size_t slot, float temp)
 {
     if (slot >= s_widget_counts[DISC_DOMAIN_TEMPERATURE] || !s_widgets[DISC_DOMAIN_TEMPERATURE])
         return;
-    if (!s_initialized || !lv_is_initialized()) return;
+    if (!s_initialized || !lv_is_initialized())
+        return;
 
     tab_widget_t* w = &s_widgets[DISC_DOMAIN_TEMPERATURE][slot];
     w->temp = temp;
     w->has_value = true;
 
-    if (!lvgl_port_lock(-1)) return;
+    if (!lvgl_port_lock(-1))
+        return;
 
     if (w->label)
     {
@@ -1193,8 +1277,10 @@ void tabbed_ui_update_temperature(size_t slot, float temp)
 
 void tabbed_ui_update_temperature_with_target(size_t slot, float temp, float target_temp)
 {
-    if (slot >= s_widget_counts[DISC_DOMAIN_CLIMATE] || !s_widgets[DISC_DOMAIN_CLIMATE]) return;
-    if (!s_initialized || !lv_is_initialized()) return;
+    if (slot >= s_widget_counts[DISC_DOMAIN_CLIMATE] || !s_widgets[DISC_DOMAIN_CLIMATE])
+        return;
+    if (!s_initialized || !lv_is_initialized())
+        return;
 
     tab_widget_t* w = &s_widgets[DISC_DOMAIN_CLIMATE][slot];
     w->temp = temp;
@@ -1203,7 +1289,8 @@ void tabbed_ui_update_temperature_with_target(size_t slot, float temp, float tar
     w->target_temp = target_temp;
     w->has_value = true;
 
-    if (!lvgl_port_lock(-1)) return;
+    if (!lvgl_port_lock(-1))
+        return;
 
     // Combined current/target label
     if (w->label)
@@ -1229,19 +1316,22 @@ void tabbed_ui_update_temperature_with_target(size_t slot, float temp, float tar
 
 void tabbed_ui_update_occupancy(size_t slot, bool occupied)
 {
-    if (slot >= s_widget_counts[DISC_DOMAIN_OCCUPANCY] || !s_widgets[DISC_DOMAIN_OCCUPANCY]) return;
-    if (!s_initialized || !lv_is_initialized()) return;
+    if (slot >= s_widget_counts[DISC_DOMAIN_OCCUPANCY] || !s_widgets[DISC_DOMAIN_OCCUPANCY])
+        return;
+    if (!s_initialized || !lv_is_initialized())
+        return;
 
     tab_widget_t* w = &s_widgets[DISC_DOMAIN_OCCUPANCY][slot];
     w->occupied = occupied;
     w->has_value = true;
 
-    if (!lvgl_port_lock(-1)) return;
+    if (!lvgl_port_lock(-1))
+        return;
 
     // Update icon color (bright lime = occupied, dim = vacant)
     if (w->label)
         lv_obj_set_style_text_color(w->label,
-            occupied ? UI_COLOR_ACCENT_LIME : lv_color_hex(0x444444), 0);
+                                    occupied ? UI_COLOR_ACCENT_LIME : lv_color_hex(0x444444), 0);
 
     // Update state text (stored in toggle ptr for occupancy)
     if (w->toggle)
@@ -1250,16 +1340,18 @@ void tabbed_ui_update_occupancy(size_t slot, bool occupied)
     lvgl_port_unlock();
 }
 
-void tabbed_ui_update_media(size_t slot, const char* state, float volume,
-                            const char* media_title)
+void tabbed_ui_update_media(size_t slot, const char* state, float volume, const char* media_title)
 {
-    if (slot >= s_widget_counts[DISC_DOMAIN_MEDIA] || !s_widgets[DISC_DOMAIN_MEDIA]) return;
-    if (!s_initialized || !lv_is_initialized()) return;
+    if (slot >= s_widget_counts[DISC_DOMAIN_MEDIA] || !s_widgets[DISC_DOMAIN_MEDIA])
+        return;
+    if (!s_initialized || !lv_is_initialized())
+        return;
 
     tab_widget_t* w = &s_widgets[DISC_DOMAIN_MEDIA][slot];
     w->has_value = true;
 
-    if (!lvgl_port_lock(-1)) return;
+    if (!lvgl_port_lock(-1))
+        return;
 
     // Update now-playing title (toggle ptr)
     if (w->toggle)

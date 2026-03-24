@@ -6,13 +6,13 @@
 #include "esp_err.h"
 
 // Maximum field lengths
-#define DISC_MAX_ENTITY_ID   64
-#define DISC_MAX_NAME        64
-#define DISC_MAX_AREA_ID     48
-#define DISC_MAX_UNIT        16
+#define DISC_MAX_ENTITY_ID 64
+#define DISC_MAX_NAME 64
+#define DISC_MAX_AREA_ID 48
+#define DISC_MAX_UNIT 16
 #define DISC_MAX_DEVICE_CLASS 32
-#define DISC_MAX_ENTITIES    200  // max total entities across all domains
-#define DISC_MAX_PER_DOMAIN  50   // max entities per NVS key (fits within 4000B limit)
+#define DISC_MAX_ENTITIES 200         // max total entities across all domains
+#define DISC_MAX_PER_DOMAIN 50        // max entities per NVS key (fits within 4000B limit)
 
 // Entity domain categories — each becomes one swipeable page
 typedef enum
@@ -33,8 +33,8 @@ typedef struct
 {
     char entity_id[DISC_MAX_ENTITY_ID];
     char friendly_name[DISC_MAX_NAME];
-    char area_id[DISC_MAX_AREA_ID];       // empty string if not area-assigned
-    char unit[DISC_MAX_UNIT];             // unit_of_measurement (sensors only)
+    char area_id[DISC_MAX_AREA_ID];           // empty string if not area-assigned
+    char unit[DISC_MAX_UNIT];                 // unit_of_measurement (sensors only)
     char device_class[DISC_MAX_DEVICE_CLASS]; // HA device_class (binary_sensor only)
     disc_domain_t domain;
     bool enabled; // for automations: false if disabled in HA
@@ -43,17 +43,17 @@ typedef struct
 // Full discovery result — heap-allocated entities array in PSRAM
 typedef struct
 {
-    disc_entity_t* entities;                  // PSRAM allocation, may be NULL if empty
-    size_t count;                             // total entity count across all domains
-    size_t domain_counts[DISC_DOMAIN_COUNT];  // per-domain entity counts
-    uint32_t checksum;                        // count-based cache validity check
-    bool loaded_from_cache;                   // true if this result came from NVS
+    disc_entity_t* entities;                 // PSRAM allocation, may be NULL if empty
+    size_t count;                            // total entity count across all domains
+    size_t domain_counts[DISC_DOMAIN_COUNT]; // per-domain entity counts
+    uint32_t checksum;                       // count-based cache validity check
+    bool loaded_from_cache;                  // true if this result came from NVS
 } disc_result_t;
 
 // Area filter context built during discovery (freed after use)
 typedef struct
 {
-    char target_area_id[DISC_MAX_AREA_ID]; // resolved area_id for the configured name
+    char target_area_id[DISC_MAX_AREA_ID];     // resolved area_id for the configured name
     char (*entity_area_ids)[DISC_MAX_AREA_ID]; // parallel array: entity_id → area_id
     char (*entity_ids_map)[DISC_MAX_ENTITY_ID];
     size_t map_count;

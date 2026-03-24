@@ -170,7 +170,8 @@ bool http_client_get(const char* path, char** out, size_t* out_len)
                             buffer = new_buffer;
                             capacity = new_capacity;
                         }
-                        int bytes = esp_http_client_read(cli, buffer + total_read, capacity - 1 - total_read);
+                        int bytes = esp_http_client_read(cli, buffer + total_read,
+                                                         capacity - 1 - total_read);
                         if (bytes < 0)
                         {
                             ESP_LOGE(TAG, "HTTP read error on %s", url);
@@ -229,8 +230,7 @@ bool http_client_post(const char* path, const char* payload)
     if (!http_client_is_configured())
     {
         ESP_LOGE(TAG, "http_client not configured (base_url='%s', token='%s')",
-                 s_base_url[0] ? s_base_url : "EMPTY",
-                 s_token[0] ? "SET" : "EMPTY");
+                 s_base_url[0] ? s_base_url : "EMPTY", s_token[0] ? "SET" : "EMPTY");
         return false;
     }
     char url[256];

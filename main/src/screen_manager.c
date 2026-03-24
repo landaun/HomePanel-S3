@@ -27,21 +27,21 @@ esp_err_t screen_manager_init(void)
 
     // Create mutex
     s_mutex = xSemaphoreCreateMutex();
-    if (!s_mutex) {
+    if (!s_mutex)
+    {
         ESP_LOGE(TAG, "Failed to create mutex");
         return ESP_ERR_NO_MEM;
     }
 
     // Create timeout timer
-    const esp_timer_create_args_t timer_args = {
-        .callback = timeout_callback,
-        .arg = NULL,
-        .dispatch_method = ESP_TIMER_TASK,
-        .name = "screen_timeout"
-    };
+    const esp_timer_create_args_t timer_args = {.callback = timeout_callback,
+                                                .arg = NULL,
+                                                .dispatch_method = ESP_TIMER_TASK,
+                                                .name = "screen_timeout"};
 
     esp_err_t ret = esp_timer_create(&timer_args, &s_timeout_timer);
-    if (ret != ESP_OK) {
+    if (ret != ESP_OK)
+    {
         ESP_LOGE(TAG, "Failed to create timeout timer: %s", esp_err_to_name(ret));
         return ret;
     }
@@ -56,20 +56,24 @@ esp_err_t screen_manager_init(void)
 
 void screen_manager_touch_activity(bool pressed)
 {
-    if (!s_mutex) return;
+    if (!s_mutex)
+        return;
 
     xSemaphoreTake(s_mutex, portMAX_DELAY);
 
-    int64_t now = esp_timer_get_time() / 1000;  // Convert to milliseconds
+    int64_t now = esp_timer_get_time() / 1000; // Convert to milliseconds
 
     // Handle touch release (tap detection)
-    if (s_was_pressed && !pressed) {
+    if (s_was_pressed && !pressed)
+    {
         // This is a tap (release after press)
         int64_t time_since_last_tap = now - s_last_tap_time;
 
-        if (s_screen_on) {
+        if (s_screen_on)
+        {
             // Screen is on - check for double-tap to sleep
-            if (time_since_last_tap < DOUBLE_TAP_WINDOW_MS && s_last_tap_time > 0) {
+            if (time_since_last_tap < DOUBLE_TAP_WINDOW_MS && s_last_tap_time > 0)
+            {
                 ESP_LOGI(TAG, "Double-tap detected - turning screen off");
                 xSemaphoreGive(s_mutex);
                 screen_manager_sleep();
@@ -77,9 +81,12 @@ void screen_manager_touch_activity(bool pressed)
             }
             // Reset inactivity timer on any touch
             reset_timeout_timer();
-        } else {
+        }
+        else
+        {
             // Screen is off - check for double-tap to wake
-            if (time_since_last_tap < DOUBLE_TAP_WINDOW_MS && s_last_tap_time > 0) {
+            if (time_since_last_tap < DOUBLE_TAP_WINDOW_MS && s_last_tap_time > 0)
+            {
                 ESP_LOGI(TAG, "Double-tap detected - turning screen on");
                 xSemaphoreGive(s_mutex);
                 screen_manager_wake();
@@ -93,29 +100,29 @@ void screen_manager_touch_activity(bool pressed)
     s_was_pressed = pressed;
 
     // Reset timeout on any activity when screen is on
-    if (s_screen_on && pressed) {
+    if (s_screen_on && pressed)
+    {
         reset_timeout_timer();
     }
 
     xSemaphoreGive(s_mutex);
 }
 
-bool screen_manager_is_on(void)
-{
-    return s_screen_on;
-}
+bool screen_manager_is_on(void) { return s_screen_on; }
 
 void screen_manager_wake(void)
 {
-    if (!s_mutex) return;
+    if (!s_mutex)
+        return;
 
     xSemaphoreTake(s_mutex, portMAX_DELAY);
 
-    if (!s_screen_on) {
+    if (!s_screen_on)
+    {
         ESP_LOGI(TAG, "Waking screen");
         lcd_rgb_bl_on();
         s_screen_on = true;
-        s_last_tap_time = 0;  // Reset tap tracking
+        s_last_tap_time = 0; // Reset tap tracking
         reset_timeout_timer();
     }
 
@@ -124,21 +131,24 @@ void screen_manager_wake(void)
 
 void screen_manager_sleep(void)
 {
-    if (!s_mutex) return;
+    if (!s_mutex)
+        return;
 
     xSemaphoreTake(s_mutex, portMAX_DELAY);
 
-    if (s_screen_on) {
+    if (s_screen_on)
+    {
         ESP_LOGI(TAG, "Putting screen to sleep");
 
         // Stop the timeout timer
-        if (s_timeout_timer) {
+        if (s_timeout_timer)
+        {
             esp_timer_stop(s_timeout_timer);
         }
 
         lcd_rgb_bl_off();
         s_screen_on = false;
-        s_last_tap_time = 0;  // Reset tap tracking
+        s_last_tap_time = 0; // Reset tap tracking
     }
 
     xSemaphoreGive(s_mutex);
@@ -146,11 +156,13 @@ void screen_manager_sleep(void)
 
 void screen_manager_set_timeout(uint32_t timeout_sec)
 {
-    if (!s_mutex) return;
+    if (!s_mutex)
+        return;
 
     xSemaphoreTake(s_mutex, portMAX_DELAY);
     s_timeout_sec = timeout_sec;
-    if (s_screen_on) {
+    if (s_screen_on)
+    {
         reset_timeout_timer();
     }
     xSemaphoreGive(s_mutex);
@@ -166,7 +178,8 @@ static void timeout_callback(void* arg)
 
 static void reset_timeout_timer(void)
 {
-    if (!s_timeout_timer || s_timeout_sec == 0) return;
+    if (!s_timeout_timer || s_timeout_sec == 0)
+        return;
 
     // Stop any existing timer
     esp_timer_stop(s_timeout_timer);
@@ -174,7 +187,8 @@ static void reset_timeout_timer(void)
     // Start timer with new timeout
     uint64_t timeout_us = (uint64_t)s_timeout_sec * 1000000;
     esp_err_t ret = esp_timer_start_once(s_timeout_timer, timeout_us);
-    if (ret != ESP_OK) {
+    if (ret != ESP_OK)
+    {
         ESP_LOGE(TAG, "Failed to start timeout timer: %s", esp_err_to_name(ret));
     }
 }

@@ -13,13 +13,11 @@ LV_FONT_DECLARE(ui_icons_font);
 #define ICON_SCENE "\xEF\x84\x8E"       // U+F10E (fa-sliders)
 
 // Room-specific icons
-#define ICON_FIRE "\xEF\x81\xAD"        // U+F06D (fireplace)
-#define ICON_BRIEFCASE "\xEF\x82\xB1"   // U+F0B1 (office)
-#define ICON_UTENSILS "\xEF\x8B\xA7"    // U+F2E7 (dining room)
-
-// Media control — use LVGL built-in symbols (always available in default montserrat font)
-#define ICON_PLAY   LV_SYMBOL_PLAY
-#define ICON_PAUSE  LV_SYMBOL_PAUSE
+#define ICON_FIRE "\xEF\x81\xAD"      // U+F06D (fireplace)
+#define ICON_BRIEFCASE "\xEF\x82\xB1" // U+F0B1 (office)
+#define ICON_UTENSILS "\xEF\x8B\xA7"  // U+F2E7 (dining room)
+#define ICON_PLAY LV_SYMBOL_PLAY
+#define ICON_PAUSE LV_SYMBOL_PAUSE
 #define ICON_VOLUME LV_SYMBOL_VOLUME_MAX
 
 // Icon styles

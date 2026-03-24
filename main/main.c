@@ -97,7 +97,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
     }
     else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
     {
-        ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+        ip_event_got_ip_t* event = (ip_event_got_ip_t*)event_data;
         ESP_LOGI(PANEL_TAG, "Got IP: " IPSTR ", network ready", IP2STR(&event->ip_info.ip));
         ESP_LOGI(PANEL_TAG, "Gateway: " IPSTR, IP2STR(&event->ip_info.gw));
         ESP_LOGI(PANEL_TAG, "Netmask: " IPSTR, IP2STR(&event->ip_info.netmask));
@@ -247,77 +247,80 @@ static void ha_poll_task(void* param)
                     continue;
 
                 cJSON* es = find_entity_state(states, e->entity_id);
-                if (!es) continue;
+                if (!es)
+                    continue;
 
                 cJSON* state_val = cJSON_GetObjectItem(es, "state");
-                if (!cJSON_IsString(state_val)) continue;
+                if (!cJSON_IsString(state_val))
+                    continue;
                 const char* sv = state_val->valuestring;
                 cJSON* attr = cJSON_GetObjectItem(es, "attributes");
 
                 switch (e->domain)
                 {
-                    case DISC_DOMAIN_LIGHT:
+                case DISC_DOMAIN_LIGHT:
+                {
+                    bool on = strcmp(sv, "on") == 0;
+                    uint8_t brightness = 0;
+                    if (cJSON_IsObject(attr))
                     {
-                        bool on = strcmp(sv, "on") == 0;
-                        uint8_t brightness = 0;
-                        if (cJSON_IsObject(attr))
-                        {
-                            cJSON* b = cJSON_GetObjectItem(attr, "brightness");
-                            if (cJSON_IsNumber(b) && b->valueint >= 0)
-                                brightness = (uint8_t)b->valueint;
-                        }
-                        tabbed_ui_update_light(s, on, brightness);
-                        break;
+                        cJSON* b = cJSON_GetObjectItem(attr, "brightness");
+                        if (cJSON_IsNumber(b) && b->valueint >= 0)
+                            brightness = (uint8_t)b->valueint;
                     }
-                    case DISC_DOMAIN_TEMPERATURE:
+                    tabbed_ui_update_light(s, on, brightness);
+                    break;
+                }
+                case DISC_DOMAIN_TEMPERATURE:
+                {
+                    float temp = strtof(sv, NULL);
+                    tabbed_ui_update_temperature(s, temp);
+                    break;
+                }
+                case DISC_DOMAIN_CLIMATE:
+                {
+                    float temp = 0.0f;
+                    float target = 0.0f;
+                    if (cJSON_IsObject(attr))
                     {
-                        float temp = strtof(sv, NULL);
-                        tabbed_ui_update_temperature(s, temp);
-                        break;
+                        cJSON* ct = cJSON_GetObjectItem(attr, "current_temperature");
+                        if (ct && cJSON_IsNumber(ct))
+                            temp = (float)ct->valuedouble;
+                        cJSON* t = cJSON_GetObjectItem(attr, "temperature");
+                        if (!t || !cJSON_IsNumber(t))
+                            t = cJSON_GetObjectItem(attr, "target_temp");
+                        if (t && cJSON_IsNumber(t))
+                            target = (float)t->valuedouble;
                     }
-                    case DISC_DOMAIN_CLIMATE:
+                    tabbed_ui_update_temperature_with_target(s, temp, target);
+                    break;
+                }
+                case DISC_DOMAIN_OCCUPANCY:
+                {
+                    bool occupied = strcmp(sv, "on") == 0;
+                    tabbed_ui_update_occupancy(s, occupied);
+                    break;
+                }
+                case DISC_DOMAIN_MEDIA:
+                {
+                    float volume = -1.0f; // negative = unknown
+                    const char* media_title = "";
+                    if (cJSON_IsObject(attr))
                     {
-                        float temp = 0.0f;
-                        float target = 0.0f;
-                        if (cJSON_IsObject(attr))
-                        {
-                            cJSON* ct = cJSON_GetObjectItem(attr, "current_temperature");
-                            if (ct && cJSON_IsNumber(ct))
-                                temp = (float)ct->valuedouble;
-                            cJSON* t = cJSON_GetObjectItem(attr, "temperature");
-                            if (!t || !cJSON_IsNumber(t))
-                                t = cJSON_GetObjectItem(attr, "target_temp");
-                            if (t && cJSON_IsNumber(t))
-                                target = (float)t->valuedouble;
-                        }
-                        tabbed_ui_update_temperature_with_target(s, temp, target);
-                        break;
+                        cJSON* v = cJSON_GetObjectItem(attr, "volume_level");
+                        if (cJSON_IsNumber(v))
+                            volume = (float)v->valuedouble;
+                        cJSON* t = cJSON_GetObjectItem(attr, "media_title");
+                        if (!t)
+                            t = cJSON_GetObjectItem(attr, "media_content_id");
+                        if (cJSON_IsString(t) && t->valuestring)
+                            media_title = t->valuestring;
                     }
-                    case DISC_DOMAIN_OCCUPANCY:
-                    {
-                        bool occupied = strcmp(sv, "on") == 0;
-                        tabbed_ui_update_occupancy(s, occupied);
-                        break;
-                    }
-                    case DISC_DOMAIN_MEDIA:
-                    {
-                        float volume = -1.0f; // negative = unknown
-                        const char* media_title = "";
-                        if (cJSON_IsObject(attr))
-                        {
-                            cJSON* v = cJSON_GetObjectItem(attr, "volume_level");
-                            if (cJSON_IsNumber(v))
-                                volume = (float)v->valuedouble;
-                            cJSON* t = cJSON_GetObjectItem(attr, "media_title");
-                            if (!t) t = cJSON_GetObjectItem(attr, "media_content_id");
-                            if (cJSON_IsString(t) && t->valuestring)
-                                media_title = t->valuestring;
-                        }
-                        tabbed_ui_update_media(s, sv, volume, media_title);
-                        break;
-                    }
-                    default:
-                        break;
+                    tabbed_ui_update_media(s, sv, volume, media_title);
+                    break;
+                }
+                default:
+                    break;
                 }
             }
 
@@ -439,12 +442,15 @@ static void panel_start_task(void* param)
     // Extract IP from URL (simple parse for http://IP:PORT format)
     char test_ip[32] = {0};
     const char* url_start = strstr(g_cfg.ha_url, "://");
-    if (url_start) {
+    if (url_start)
+    {
         url_start += 3; // Skip "://"
         const char* port_start = strchr(url_start, ':');
-        if (port_start) {
+        if (port_start)
+        {
             size_t ip_len = port_start - url_start;
-            if (ip_len < sizeof(test_ip)) {
+            if (ip_len < sizeof(test_ip))
+            {
                 strncpy(test_ip, url_start, ip_len);
                 ESP_LOGI(PANEL_TAG, "Extracted HA IP: %s", test_ip);
             }

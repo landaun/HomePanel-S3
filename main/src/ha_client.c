@@ -861,7 +861,8 @@ esp_err_t ha_client_light_turn_on(const char* entity_id, const cJSON* params)
 
     char* json_str = cJSON_Print(root);
     ESP_LOGI(TAG, "POST %s with body: %s", HA_API_LIGHT_TURN_ON, json_str ? json_str : "NULL");
-    if (json_str) {
+    if (json_str)
+    {
         cJSON_free(json_str);
     }
 
@@ -886,7 +887,8 @@ esp_err_t ha_client_light_turn_off(const char* entity_id)
 
     char* json_str = cJSON_Print(root);
     ESP_LOGI(TAG, "POST %s with body: %s", HA_API_LIGHT_TURN_OFF, json_str ? json_str : "NULL");
-    if (json_str) {
+    if (json_str)
+    {
         cJSON_free(json_str);
     }
 

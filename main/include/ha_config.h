@@ -56,7 +56,7 @@ extern ha_config_t g_ha_config;
 
 // Config registry endpoints (used by discovery module)
 #define HA_API_ENTITY_REGISTRY "/api/config/entity_registry/list"
-#define HA_API_AREA_REGISTRY   "/api/config/area_registry/list"
+#define HA_API_AREA_REGISTRY "/api/config/area_registry/list"
 
 // Service domain helpers
 #define HA_DOMAIN_LIGHT_STR "light"
