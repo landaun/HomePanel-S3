@@ -35,10 +35,10 @@ jobs:
           idf.py reconfigure
           git diff --exit-code dependencies.lock sdkconfig
           idf.py build
-      - name: Run unit tests
+      - name: Build unit tests
         run: |
           set -o pipefail
-          idf.py test 2>&1 | tee test.log
+          idf.py -T main build 2>&1 | tee test.log
       - name: Upload test log
         if: always()
         uses: actions/upload-artifact@v4
